@@ -1,0 +1,72 @@
+<div class="main-container container-fluid">
+  <div class="search-header container">
+    <div class="row py-3">
+      <div class="col-md-6 offset-md-6">
+        <form>
+          <div class="row">
+            <div class="col">
+              <input class="form-control mr-sm-2" (keyup)="searchSources($event)" type="search" placeholder="Search" aria-label="Search">
+            </div>
+            <div class="col">
+              <select (change)="selectCategorySource($event)" class="custom-select">
+                <option selected value="all">Categories</option>
+                <option *ngFor="let category of categories" [value]="category">{{category}}</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="news-container container" *ngIf="searchResults.length > 0" >
+    <div class="row d-flex justify-content-between">
+      <div class="card my-4" *ngFor="let source of searchResults">
+        <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{source.name}">
+        <div class="card-body">
+          <h5 class="card-title">{{source.name}}</h5>
+          <p class="card-text">{{source.description}}</p>
+          <span class="category">{{source.category}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="news-container container" *ngIf="searchResults.length == 0" >
+    <div class="row d-flex justify-content-between">
+      <div class="card my-4" *ngFor="let source of sourcesForShow">
+        <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{source.name}">
+        <div class="card-body">
+          <h5 class="card-title">{{source.name}}</h5>
+          <p class="card-text">{{source.description}}</p>
+          <span class="category">{{source.category}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container py-4 pagination-container" *ngIf="searchResults.length == 0">
+    <div class="row d-flex justify-content-left align-items-baseline">
+      <span class="custom-pagination-message">displaying page</span>
+        <nav class="">
+            <ul class="pagination d-flex justify-content-left align-items-baseline">
+              <li class="page-item">
+                <div class="input-group">
+                  <div class="input-group-prepend" *ngIf="page > 0" >
+                    <a class="page-link" aria-label="Previous" (click)="previousPage(page-1)">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </div>
+                  <input type="number" class="form-control" placeholder="{{page + 1}}">
+                </div>
+              </li>
+              <span class="custom-number-counting">of {{totalPages}}</span>
+              <li class="page-item" *ngIf="page < totalPages -1" >
+                <a class="page-link" aria-label="Next" (click)="nextPage(page+1)" >
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+    </div>
+  </div>
+</div>
+
+<router-outlet></router-outlet>

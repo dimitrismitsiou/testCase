@@ -1,0 +1,35 @@
+.footer-container {
+    border-top: 1px solid #9c9c9c;
+    .row {
+        @media only screen and (max-width: 767px) {
+            flex-direction: column;
+        }
+    }
+}
+ul.footer-menu {
+    list-style: none;  
+    padding: 0;
+    li {
+        display: inline-block;
+        padding: 0 3px;
+        a {
+            color: #222222;
+            &.hover {
+                color: #222222;
+            }
+        }
+    } 
+}
+
+.copy-left, .footer-menu, .copy-right {
+    color: #222222;
+    p, a {
+        font-size: 12px;
+    }
+    p {
+        padding-top: 5px;
+    }
+    @media only screen and (max-width: 767px) {
+        text-align: center;
+    }
+}
