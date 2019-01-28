@@ -8,6 +8,8 @@ import { FooterComponent } from './footer/footer.component';
 import { MainComponent } from './main/main.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FilterSourcesPipe } from './filter-sources.pipe';
+import { NewsComponent } from './news/news.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -15,12 +17,14 @@ import { FilterSourcesPipe } from './filter-sources.pipe';
     HeaderComponent,
     FooterComponent,
     MainComponent,
-    FilterSourcesPipe
+    FilterSourcesPipe,
+    NewsComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

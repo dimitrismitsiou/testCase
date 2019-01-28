@@ -4,18 +4,6 @@
 .search-header {
     border-bottom: 1px solid rgb(156, 156, 156); 
 }
-.news-container {
-    .card {
-        width: 20rem;
-        .card-body {
-            display: flex;
-            flex-direction: column;
-            .card-text {
-                flex: 1;
-            }
-        }
-    }
-}
 .pagination-container {
     .custom-pagination-message {
         margin-right: 10px;
