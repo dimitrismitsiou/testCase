@@ -23,17 +23,17 @@ export class MainComponent implements OnInit {
   categories = [];
   news = [];
   selectedCategory = 'all';
-  
+
   getNews = new BehaviorSubject([]);
-  searchChanged: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  categoryChanged: BehaviorSubject<string> = new BehaviorSubject<string>(this.selectedCategory);
+  searchChanged: Subject<string> = new Subject<string>();
+  categoryChanged: Subject<string> = new Subject<string>();
 
   private readonly DEBOUNCE_PERIOD = 300;
 
   constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router) {
     this.http.get('https://newsapi.org/v1/sources').subscribe((res: any) => {
-      this.getNews.next(res.sources);
       this.allSources = res.sources;
+      this.getNews.next(res.sources);
       const tempCategories = res.sources.map(s => s.category);
       this.categories = tempCategories.filter( this.onlyUnique );
       this.applyQueryParams(this.route.snapshot.queryParams);
@@ -46,19 +46,25 @@ export class MainComponent implements OnInit {
   ngOnInit() {
     this.getNews.subscribe((news: any) => {
       this.totalPages = Math.ceil(news.length / 6);
-      this.news = news.slice(0, 6);
-      this.page = 0;
+      if ('page' in this.route.snapshot.queryParams && this.totalPages >= +this.route.snapshot.queryParams.page) {
+        const askedPage = +this.route.snapshot.queryParams.page - 1;
+        this.news = news.slice((6 * askedPage), (6 * askedPage) + 6);
+        this.page = askedPage;
+      } else {
+        this.news = news.slice(0, 6);
+        this.page = 0;
+      }
     });
 
     combineLatest([this.searchChanged, this.categoryChanged]).pipe(
       debounceTime(this.DEBOUNCE_PERIOD)
     ).subscribe((res) => {
       let records = this.allSources.filter(s => s.name.toLowerCase().startsWith(res[0].toLowerCase()));
-      if(res[1] !== 'all'){
-        records = records.filter(s => s.category.toLowerCase().startsWith(res[1].toLowerCase()))
+      if (res[1] !== 'all') {
+        records = records.filter(s => s.category.toLowerCase().startsWith(res[1].toLowerCase()));
       }
       this.getNews.next(records);
-      this.navigateToRoute({term: res[0], category: res[1]});
+      this.navigateToRoute({term: res[0], category: res[1], page: this.page + 1});
     });
   }
 
@@ -67,6 +73,7 @@ export class MainComponent implements OnInit {
   }
 
   applyQueryParams(queryParams) {
+
     if ('category' in queryParams) {
       this.categoryChanged.next(queryParams.category);
       this.selectedCategory = queryParams.category;
@@ -75,10 +82,6 @@ export class MainComponent implements OnInit {
     if ('term' in queryParams) {
       this.searchValue = queryParams.term;
       this.searchChanged.next(queryParams.term);
-    }
-
-    if ('page' in queryParams) {
-      this.goToPage(queryParams.page);
     }
   }
 
@@ -90,12 +93,6 @@ export class MainComponent implements OnInit {
     });
   }
 
-  goToPage(page) {
-    const totalPages = Math.ceil(this.getNews.getValue().length / 6);
-    if (totalPages >= +page) {
-
-    }
-  }
 
   nextPage(page) {
     this.news = this.getNews.getValue().slice((6 * page), (6 * page) + 6);
