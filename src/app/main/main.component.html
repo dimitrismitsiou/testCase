@@ -5,7 +5,7 @@
         <form>
           <div class="row">
             <div class="col">
-              <input class="form-control mr-sm-2" (keyup)="searchSources($event)" type="search" placeholder="Search" aria-label="Search">
+              <input class="form-control mr-sm-2" (keyup)="searchSources($event)" name="search" [(ngModel)]="searchValue" type="search" placeholder="Search" aria-label="Search">
             </div>
             <div class="col">
               <select (change)="selectCategorySource($event)" name="category" [(ngModel)]="selectedCategory" class="custom-select">

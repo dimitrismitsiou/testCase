@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Subject, Observable, fromEvent } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { map } from 'rxjs/operators';
 import { debounceTime } from 'rxjs/operators';
@@ -23,10 +23,12 @@ export class MainComponent implements OnInit {
   categories = [];
   news = [];
   selectedCategory = 'all';
-
+  
   getNews = new BehaviorSubject([]);
-  searchChanged: Subject<string> = new Subject<string>();
-  categoryChanged: Subject<string> = new Subject<string>();
+  searchChanged: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  categoryChanged: BehaviorSubject<string> = new BehaviorSubject<string>(this.selectedCategory);
+
+  private readonly DEBOUNCE_PERIOD = 300;
 
   constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router) {
     this.http.get('https://newsapi.org/v1/sources').subscribe((res: any) => {
@@ -48,28 +50,16 @@ export class MainComponent implements OnInit {
       this.page = 0;
     });
 
-    this.searchChanged.pipe(
-      debounceTime(1000),
-    ).subscribe(term => {
-      if (term.length > 0) {
-        this.getNews.next(this.getNews.getValue().filter(s => s.name.toLowerCase().startsWith(term.toLowerCase())));
-      } else {
-        // allagi logikis gia na krataei to proigoumeno state
-        this.getNews.next(this.getNews.getValue());
+    combineLatest([this.searchChanged, this.categoryChanged]).pipe(
+      debounceTime(this.DEBOUNCE_PERIOD)
+    ).subscribe((res) => {
+      let records = this.allSources.filter(s => s.name.toLowerCase().startsWith(res[0].toLowerCase()));
+      if(res[1] !== 'all'){
+        records = records.filter(s => s.category.toLowerCase().startsWith(res[1].toLowerCase()))
       }
-      this.navigateToRoute({term: term});
+      this.getNews.next(records);
+      this.navigateToRoute({term: res[0], category: res[1]});
     });
-
-    this.categoryChanged.pipe(
-        debounceTime(500),
-      ).subscribe(cat => {
-        if (cat !== 'all') {
-          this.getNews.next(this.allSources.filter(s => s.category.toLowerCase().startsWith(cat.toLowerCase())));
-        } else {
-          this.getNews.next(this.allSources);
-        }
-        this.navigateToRoute({category: cat});
-      });
   }
 
   onlyUnique(value, index, self) {
@@ -83,6 +73,7 @@ export class MainComponent implements OnInit {
     }
 
     if ('term' in queryParams) {
+      this.searchValue = queryParams.term;
       this.searchChanged.next(queryParams.term);
     }
 
